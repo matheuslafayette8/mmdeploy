@@ -1,7 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmdeploy.core import FUNCTION_REWRITER, mark
 from mmdeploy.utils.constants import Backend
-
+import torch
+import torch.nn.functional as F
 
 @FUNCTION_REWRITER.register_rewriter(
     func_name='mmseg.models.segmentors.EncoderDecoder.predict')
@@ -32,6 +33,8 @@ def encoder_decoder__predict(self, inputs, data_samples, **kwargs):
         return seg_logit
 
     seg_logit = __mark_seg_logit(seg_logit)
+
+    return F.softmax(seg_logit, dim=1)
 
     seg_pred = seg_logit.argmax(dim=1, keepdim=True)
     return seg_pred
